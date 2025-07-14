@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Registration</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="icon" href="asc.png" type="image/png">
+    <!-- External JS Script -->
+    <script src="script.js"></script>
+    <style>
+        th {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<header class="bg-light text-center py-3 border-bottom w-100">
+    <div class="container-fluid">
+        <h1 class="mb-0">Hospital Management System</h1>
+        <p class="text-muted mb-0">Managing patient records efficiently and easily</p>
+    </div>
+</header>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-success w-100">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">
+            <img src="asc.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+            Hospital Management System
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navLinks">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" href="add.html">Add Record</a></li>
+                <li class="nav-item"><a class="nav-link" href="list.html">View Records</a></li>
+                <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Main Content -->
+<div class="container my-5">
+    <h2>Patient Registration</h2>
+    <form name="pat_sample" onsubmit="addPatientsIntoTheTable(event)">
+        <div class="mb-3">
+            <label for="name" class="form-label">Patient Name</label>
+            <input type="text" class="form-control" id="name" name="name" list="nameSuggestions" required>
+            <datalist id="nameSuggestions"></datalist>
+        </div>
+        <div class="mb-3">
+            <label for="age" class="form-label">Age</label>
+            <input type="number" class="form-control" id="age" name="age" required>
+        </div>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select class="form-select" id="gender" name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="condition" class="form-label">Condition</label>
+            <input type="text" class="form-control" id="condition" name="condition" list="conditionSuggestions" required>
+            <datalist id="conditionSuggestions"></datalist>
+        </div>
+        <button type="submit" class="btn btn-primary" id="addPatientBtn" onclick="addPatient()">Add Patient</button>
+    </form>
+    <!-- Button to Sort by Name -->
+    <button class="btn btn-secondary my-3" onclick="sortTableByName()">Sort by Name</button>
+    <!-- Table -->
+    <h3 class="mt-5">Registered Patients</h3>
+    <table class="table table-striped" id="pat_data" data-sort-dir="asc">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Condition</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<!-- Footer -->
+<footer class="bg-success text-white pt-4 pb-3 mt-4">
+    <div class="container text-center text-md-start">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h5>Hospital Management System</h5>
+                <p>Providing efficient digital solutions for patient record management.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Contact Us</h5>
+                <p>Email: support@hospitalms.com</p>
+                <p>Phone: +92 123 4567890</p>
+                <p>Location: Lahore, Pakistan</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Follow Us</h5>
+                <a href="#" class="text-white me-3" aria-label="Facebook">Facebook</a><br>
+                <a href="#" class="text-white me-3" aria-label="Twitter">Twitter</a><br>
+                <a href="#" class="text-white" aria-label="Instagram">Instagram</a>
+            </div>
+        </div>
+        <hr class="border-light">
+        <div class="text-center small">
+            &copy; 2025 Hospital Management System. All rights reserved.
+        </div>
+    </div>
+</footer>
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

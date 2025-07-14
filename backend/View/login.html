@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Hospital Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="storage.js" defer></script> <!-- Link to storage.js -->
+</head>
+<body>
+  <div class="container">
+    <h2 class="my-4">Login</h2>
+    <form onsubmit="login(event)">
+      <div class="mb-3">
+        <label for="login_role" class="form-label">Select Role</label>
+        <select id="login_role" class="form-control" required onchange="toggleFields(this.value, true)">
+          <option value="patient">Patient</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="mb-3" id="login_email_field" style="display:none;">
+        <label for="login_email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="login_email" required>
+      </div>
+      <div class="mb-3" id="login_key_field" style="display:none;">
+        <label for="login_key" class="form-label">Admin Key</label>
+        <input type="text" class="form-control" id="login_key" required>
+      </div>
+      <div class="mb-3" id="login_password_field" style="display:none;">
+        <label for="login_password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="login_password" required>
+      </div>
+      <button type="submit" class="btn btn-success">Login</button>
+    </form>
+  </div>
+</body>
+</html>

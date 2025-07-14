@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Dashboard | Hospital Management</title>
+  <script src="charts.js" defer></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" href="asc.png" type="image/png">
+</head>
+<style>
+  footer {
+    width: 100vw;
+    margin: 0;
+  }
+  footer .container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+  body, html {
+    padding: 0;
+    margin: 0;
+  }
+</style>
+<body class="bg-light">
+    <header class="bg-light text-center py-3 border-bottom">
+        <h1 class="mb-0">Hospital Management System</h1>
+        <p class="text-muted mb-0">Managing patient records efficiently and easily</p>
+    </header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="asc.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+                Hospital Management System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navLinks">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="add.html">Add Record</a></li>
+                    <li class="nav-item"><a class="nav-link" href="list.html">View Records</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+  <div class="container py-4">
+    <h2 class="mb-4 text-center">Patients Dashboard (with dummy values as of now)</h2> 
+    <div class="row text-center mb-4">
+      <div class="col-md-4">
+        <div class="card bg-white shadow-sm p-3">
+          <h4>Total Patients</h4>
+          <p id="total_pat" class="fs-4 text-primary">0</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-white shadow-sm p-3">
+          <h4>Visited</h4>
+          <p id="visited_pat" class="fs-4 text-success">0</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-white shadow-sm p-3">
+          <h4>Not Visited</h4>
+          <p id="not_visited_pat" class="fs-4 text-danger">0</p>
+        </div>
+      </div>
+    </div>
+    <div style="width: 100%; max-width: 300px; margin: auto;">
+        <canvas id="taskChart"></canvas>
+      </div>
+  <script>
+  </script>
+    <!-- Footer -->
+    <footer class="bg-success text-white pt-4 pb-3 mt-4">
+      <div class="container-fluid text-center text-md-start px-0">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5>Hospital Management System</h5>
+                    <p>Providing efficient digital solutions for patient record management.</p>
+                </div>  
+                <!-- Contact Info -->
+                <div class="col-md-4 mb-3">
+                    <h5>Contact Us</h5>
+                    <p>Email: support@hospitalms.com</p>
+                    <p>Phone: +92 123 4567890</p>
+                    <p>Location: Lahore, Pakistan</p>
+                </div>  
+                <!-- Social Links -->
+                <div class="col-md-4 mb-3">
+                    <h5>Follow Us</h5>
+                    <a href="#" class="text-white me-3" aria-label="Facebook">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </a><br>
+                    <a href="#" class="text-white me-3" aria-label="Twitter">
+                        <i class="bi bi-twitter"></i> Twitter
+                    </a><br>
+                    <a href="#" class="text-white" aria-label="Instagram">
+                        <i class="bi bi-instagram"></i> Instagram
+                    </a>
+                </div>  
+            </div>  
+            <hr class="border-light">  
+            <div class="text-center small">
+                &copy; 2025 Hospital Management System. All rights reserved.
+            </div>
+        </div>
+    </footer>  
+</body>
+</html>

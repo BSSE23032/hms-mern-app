@@ -1,0 +1,37 @@
+[
+  {
+    "id": "P001",
+    "name": "Ali Khan",
+    "age": 35,
+    "gender": "Male",
+    "problem": "Diabetes"
+  },
+  {
+    "id": "P002",
+    "name": "Sara Ahmed",
+    "age": 28,
+    "gender": "Female",
+    "problem": "Asthma"
+  },
+  {
+    "id": "P003",
+    "name": "Hamza Tariq",
+    "age": 42,
+    "gender": "Male",
+    "problem": "Hypertension"
+  },
+  {
+    "id": "P004",
+    "name": "Ayesha Malik",
+    "age": 31,
+    "gender": "Female",
+    "problem": "Back Pain"
+  },
+  {
+    "id": "P005",
+    "name": "Usman Javed",
+    "age": 50,
+    "gender": "Male",
+    "problem": "Heart Disease"
+  }
+]
