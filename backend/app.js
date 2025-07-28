@@ -3,6 +3,7 @@ const app = express();
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const patientRoutes = require('./routes/patientRoutes');
+const userRoutes = require('./routes/userRoutes');
 const cors = require('cors');
 const path = require('path');
 
@@ -21,5 +22,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend')));
 
 app.use('/api/patients', patientRoutes);
+app.use('/api/users', userRoutes);
 
 module.exports = app;

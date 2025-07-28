@@ -51,3 +51,32 @@ exports.deletePatient = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.getPatientsByDoctor = async (req, res) => {
+  try {
+    const doctorName = req.params.doctor;
+    
+    const patients = await Patient.find({ doctor: doctorName });
+    
+    res.json(patients);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+exports.markAsVisited = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await Patient.findByIdAndUpdate(
+      id,
+      { visited: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+
+    res.json({ message: 'Marked as visited', patient: updated });
+  } catch (error) {
+    console.error('Mark as visited error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
