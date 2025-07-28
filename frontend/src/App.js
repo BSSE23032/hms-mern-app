@@ -10,7 +10,8 @@ import SignUp from './pages/SignUp';
 import NotFound from './pages/NotFound';
 import Header from './components/Header';
 import Footer from './components/Footer';
-
+import LogRocket from 'logrocket';
+LogRocket.init('7noh0b/hms-mern-app');
 function App() {
   return (
     <Router>

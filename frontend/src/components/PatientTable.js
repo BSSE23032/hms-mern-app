@@ -1,4 +1,3 @@
-// Replace current code for PatientTable.js with this:
 import { Link } from 'react-router-dom';
 
 export default function PatientTable({ patient, on_delete, on_mark_visited, role, doctor }) {
@@ -10,7 +9,10 @@ export default function PatientTable({ patient, on_delete, on_mark_visited, role
       <td>{patient.med_problem}</td>
       <td>{patient.doctor}</td>
       <td>
-        {role === 'admin' && (
+        {role === 'admin' && patient.visited && (
+          <span className="badge bg-success">Visited</span>
+        )}
+        {role === 'admin' && !patient.visited && (
           <div className="btn-group">
             <Link to={`/edit/${patient._id}`} className="btn btn-sm btn-warning me-2">
               Edit
@@ -23,18 +25,18 @@ export default function PatientTable({ patient, on_delete, on_mark_visited, role
             </button>
           </div>
         )}
+        
+        {role === 'doctor' && patient.doctor === doctor && patient.visited && (
+          <span className="badge bg-success">Visited</span>
+        )}
 
-        {role === 'doctor' && patient.doctor === doctor && (
-          patient.visited ? (
-            <span className="badge bg-success">Visited</span>
-          ) : (
-            <button
-              className="btn btn-sm btn-success"
-              onClick={() => on_mark_visited(patient._id)}
-            >
-              Mark as Visited
-            </button>
-          )
+        {role === 'doctor' && patient.doctor === doctor && !patient.visited && (
+          <button
+            className="btn btn-sm btn-success"
+            onClick={() => on_mark_visited(patient._id)}
+          >
+            Mark as Visited
+          </button>
         )}
       </td>
     </tr>

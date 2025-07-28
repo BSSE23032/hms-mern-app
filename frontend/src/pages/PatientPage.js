@@ -10,7 +10,6 @@ export default function PatientPage() {
   const user_role = localStorage.getItem('userRole');
   const doctor_name = localStorage.getItem('userName');
 
-  // Moved fetchPatients outside useEffect so we can reuse it
   const fetchPatients = useCallback(async () => {
     try {
       setLoading(true);
@@ -70,7 +69,7 @@ export default function PatientPage() {
 
       if (res.ok) {
         console.log('Patient marked as visited:', data);
-        await fetchPatients(); // ⬅️ Refresh the patient list after marking as visited
+        await fetchPatients();
       } else {
         console.error('Error:', data.error);
       }

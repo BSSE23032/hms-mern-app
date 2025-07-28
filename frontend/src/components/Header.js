@@ -4,8 +4,8 @@ export default function Header() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.clear(); 
-    navigate('/signin'); 
+    localStorage.clear();
+    navigate('/signin');
   };
 
   const userId = localStorage.getItem('userId');
