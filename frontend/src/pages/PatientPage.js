@@ -164,7 +164,6 @@ export default function PatientPage() {
               Next
             </button>
           </div>
-
         </div>
       )}
     </div>
