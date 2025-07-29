@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
-
+import mixpanel from '../utils/mixpanel';
 export default function Header() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.clear();
+    mixpanel.track('User Logged Out');
     navigate('/signin');
   };
 
@@ -29,7 +30,6 @@ export default function Header() {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarNav">
-          {/* Left-aligned nav items */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link to="/" className="nav-link">Home</Link>

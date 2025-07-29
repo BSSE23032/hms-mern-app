@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PatientForm from '../components/PatientForm';
-
+import mixpanel from "../utils/mixpanel";
 export default function AddPatient() {
   const [isAllowed, setIsAllowed] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +22,12 @@ export default function AddPatient() {
         if (res.ok && data.role === 'admin') {
           setIsAllowed(true);
         } else {
+          setIsAllowed(false)
           alert('Only admins can access this page');
+          mixpanel.track('Visit the Add Patient page without being an admin',{
+            role:'doctor',
+            name:localStorage.getItem('userName')
+          });
           navigate('/');
         }
       } catch (err) {

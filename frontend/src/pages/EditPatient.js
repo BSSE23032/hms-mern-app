@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-
+import mixpanel from '../utils/mixpanel';
 export default function EditPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ export default function EditPatient() {
         setfilteredDoctors([]);
       }
     };
-
+    mixpanel.track('Visit Edit Patient Page')
     fetchDoctors();
   }, [patient?.med_problem]);
 
@@ -80,6 +80,10 @@ export default function EditPatient() {
       });
 
       if (res.ok) {
+        mixpanel.track('Patient Updated', {
+          id: patient._id,
+          name: patient.name,
+        });
         navigate('/patients');
       } else {
         const errorData = await res.json();
@@ -88,6 +92,10 @@ export default function EditPatient() {
     } catch (err) {
       console.error(err);
       setError("Something went wrong.");
+      mixpanel.track('Update Patient Failed', {
+        error: err.message || 'Unknown Error',
+        patientId: patient._id,
+      });
     }
   };
 
@@ -115,7 +123,7 @@ export default function EditPatient() {
                       onChange={handleChange}
                       required
                     />
-                    <small className='text-danger'>The name should not exceed 20 characters</small>
+                    <small>The name should not exceed 20 characters</small>
                   </div>
 
                   <div className="mb-3">
@@ -128,7 +136,7 @@ export default function EditPatient() {
                       onChange={handleChange}
                       required
                     />
-                    <small className='text-danger'>Age should be between 1 and 100</small>
+                    <small>Age should be between 1 and 100</small>
                   </div>
 
                   <div className="mb-3">
@@ -188,7 +196,7 @@ export default function EditPatient() {
                         <option disabled>No doctors found</option>
                       )}
                     </select>
-                    <small className='text-danger'>Problem should be selected first from list</small>
+                    <small>Problem should be selected first from list</small>
                   </div>
 
                   <div className="d-flex gap-2">

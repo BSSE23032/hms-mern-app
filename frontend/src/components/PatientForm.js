@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import mixpanel from "../utils/mixpanel";
 export default function PatientForm() {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
@@ -12,9 +13,9 @@ export default function PatientForm() {
   const navigate = useNavigate();
 
   const handleCancel = () => {
-    navigate('/');  // This goes to the Home page
+    mixpanel.track('Press Cancel Button');
+    navigate('/'); 
   };
-  // Fetch doctors when specialization changes
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -31,6 +32,7 @@ export default function PatientForm() {
         console.error('Doctor fetch error:', err);
         setFilteredDoctors([]);
       }
+      mixpanel.track("Visited Add Patient Form");
     };
 
     if (med_problem) {
@@ -64,6 +66,10 @@ export default function PatientForm() {
       const data = await res.json();
       if (res.ok) {
         setMessage('Patient added successfully');
+         mixpanel.track('Patient Added', {
+              name: name,
+              doctor: doctor,
+  });
         setName('');
         setAge('');
         setGender('');
@@ -75,6 +81,9 @@ export default function PatientForm() {
     } catch (err) {
       console.error('Submit error:', err);
       setMessage('Something went wrong');
+      mixpanel.track('Add Patient Failed', {
+      error: err.message || 'Unknown Error',e});
+
     }
   };
 
@@ -95,7 +104,7 @@ export default function PatientForm() {
                   onChange={(e) => setName(e.target.value)}
                   required
                 />
-                <small className='text-danger'>The name should not exceed 20 characters</small>
+                <small>The name should not exceed 20 characters</small>
               </div>
 
               <div className="mb-3">
@@ -107,7 +116,7 @@ export default function PatientForm() {
                   onChange={(e) => setAge(e.target.value)}
                   required
                 />
-                <small className='text-danger'>Age should be between 1 and 100</small>
+                <small>Age should be between 1 and 100</small>
               </div>
 
               <div className="mb-3">
@@ -164,7 +173,7 @@ export default function PatientForm() {
                     <option disabled>No doctors found</option>
                   )}
                 </select>
-                <small className='text-danger'>Problem should be selected first from list</small>
+                <small>Problem should be selected first from list</small>
               </div>
 
               <div className="d-flex gap-2">

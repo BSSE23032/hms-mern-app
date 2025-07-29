@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import mixpanel from "../utils/mixpanel";
 export default function SignupForm() {
   const [role, setRole] = useState('');
   const [name, setName] = useState('');
@@ -12,12 +12,13 @@ export default function SignupForm() {
   const [success, setSuccess] = useState('');
   const [show_password, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
   useEffect(() => {
-  const userId = localStorage.getItem('userId');
-  if (userId) {
-    navigate('/');  // redirect to homepage if already logged in
-  }
-}, [navigate]);
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      navigate('/');  // redirect to homepage if already logged in
+    }
+  }, [navigate]);
   const handleRoleChange = (e) => {
     setRole(e.target.value);
     setAdminCode('');
@@ -29,8 +30,8 @@ export default function SignupForm() {
     e.preventDefault();
 
     // Local field validation before sending to backend
-    if (!role || !email || !password || !name || 
-      (role === 'admin' && !adminCode) || 
+    if (!role || !email || !password || !name ||
+      (role === 'admin' && !adminCode) ||
       (role === 'doctor' && !specialization)) {
       setError(' Please fill all required fields.');
       return;
@@ -60,15 +61,18 @@ export default function SignupForm() {
 
       if (res.ok) {
         setSuccess('Registeration Successfull.');
+        mixpanel.track('User Signed Up', {
+          email: email,
+        });
         navigate('/')
         setError('');
         setRole('');
         setName('');
         setEmail('');
         setPassword('');
-         setAdminCode('');
+        setAdminCode('');
         setSpecialization('');
-        
+
       } else {
         if (data.error === 'This email is already in use') {
           setError(' This email is already registered. Please use another.');
@@ -83,6 +87,10 @@ export default function SignupForm() {
       }
     } catch (err) {
       setError('Something went wrong. Please check your internet and try again.');
+      mixpanel.track('Sign Up Failed', {
+        error: err.message || 'Unknown Error',
+        email: email,
+      });
       setSuccess('');
     }
   };
@@ -170,27 +178,27 @@ export default function SignupForm() {
           />
         </div>
 
-<div className="mb-3 position-relative">
-  <label>Password:</label>
-  <input
-    type={show_password ? 'text' : 'password'}
-    className="form-control pe-5"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    placeholder="Enter password"
-    required
-  />
-  <i
-  className={`fa ${show_password ? 'fa-eye-slash' : 'fa-eye'} position-absolute`}
-  onClick={() => setShowPassword(!show_password)}
-  style={{
-    right: '10px',
-    top: '38px',
-    cursor: 'pointer',
-    color: 'black',
-  }}
-></i>
-</div>
+        <div className="mb-3 position-relative">
+          <label>Password:</label>
+          <input
+            type={show_password ? 'text' : 'password'}
+            className="form-control pe-5"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter password"
+            required
+          />
+          <i
+            className={`fa ${show_password ? 'fa-eye-slash' : 'fa-eye'} position-absolute`}
+            onClick={() => setShowPassword(!show_password)}
+            style={{
+              right: '10px',
+              top: '38px',
+              cursor: 'pointer',
+              color: 'black',
+            }}
+          ></i>
+        </div>
 
         <button type="submit" className="btn btn-success w-100">Sign Up</button>
       </form>
