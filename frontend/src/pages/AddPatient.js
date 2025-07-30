@@ -24,9 +24,10 @@ export default function AddPatient() {
         } else {
           setIsAllowed(false)
           alert('Only admins can access this page');
-          mixpanel.track('Visit the Add Patient page without being an admin',{
-            role:'doctor',
-            name:localStorage.getItem('userName')
+          mixpanel.track('Visit the Add Patient page without being an admin', {
+            role: 'doctor',
+            name: localStorage.getItem('userName'),
+            id: localStorage.getItem('userId'),
           });
           navigate('/');
         }
@@ -42,11 +43,11 @@ export default function AddPatient() {
 
   if (!isAllowed) return <p>Checking access...</p>;
 
- return (
+  return (
     <div className="container mt-3">
       <div className="row justify-content-center">
         <div className="col-md-7">
-        <h3 className="text-dark mb-4 text-center border-bottom pb-2">Add a New Patient</h3>
+          <h3 className="text-dark mb-4 text-center border-bottom pb-2">Add a New Patient</h3>
           <PatientForm />
         </div>
       </div>
@@ -54,4 +55,3 @@ export default function AddPatient() {
   );
 }
 
-    

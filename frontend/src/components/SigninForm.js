@@ -20,9 +20,9 @@ export default function SigninForm() {
 
     if (!email || !password) {
       setError('Please fill all required fields.');
-       mixpanel.track('Validation Failed - Sign In', {
-       missing: !email ? 'Email' :!password? 'Password':'Email & Passwords',
-  });
+      mixpanel.track('Validation Failed - Sign In', {
+        missing: (!email && password) ? 'Email' : (!password && email) ? 'Password' : 'Email & Passwords',
+      });
       return;
     }
 
@@ -37,19 +37,28 @@ export default function SigninForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user)
       });
-      
+
       const data = await res.json();
       if (res.ok) {
         setSuccess('Login successful! Redirecting...');
-        mixpanel.track('User Signed In', {
-          email: email,
-        });
         setError('');
         if (data && data._id) {
           localStorage.setItem('userId', data._id);
           localStorage.setItem('userRole', data.role);
           localStorage.setItem('userName', data.name); // Store the name
           localStorage.setItem('userSpecialization', data.specialization);
+          mixpanel.track('User Signed In', {
+            email: email,
+            role: data.role,
+            data: data._id
+          });
+          mixpanel.identify(localStorage.getItem('userId'));
+
+          mixpanel.people.set({
+            $name: data.name,
+            role: data.role,
+            user_id: data._id
+          });
         } else {
           console.error("User data missing in response:", data);
           setError("Unexpected server response. Please try again.");

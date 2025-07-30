@@ -46,7 +46,13 @@ export default function EditPatient() {
         setfilteredDoctors([]);
       }
     };
-    mixpanel.track('Visit Edit Patient Page')
+    mixpanel.track('Visit Edit Patient Page');
+    mixpanel.identify(localStorage.getItem('userId'));
+    mixpanel.people.set({
+      $name: localStorage.getItem('userName'),
+      role: localStorage.getItem('userRole'),
+      user_id: localStorage.getItem('userId')
+    });
     fetchDoctors();
   }, [patient?.med_problem]);
 
@@ -81,8 +87,10 @@ export default function EditPatient() {
 
       if (res.ok) {
         mixpanel.track('Patient Updated', {
-          id: patient._id,
-          name: patient.name,
+          patint_id: patient._id,
+          patient: patient.name,
+          admin: localStorage.getItem('userName'),
+          user_id: localStorage.getItem('userId'),
         });
         navigate('/patients');
       } else {
@@ -95,6 +103,8 @@ export default function EditPatient() {
       mixpanel.track('Update Patient Failed', {
         error: err.message || 'Unknown Error',
         patientId: patient._id,
+        id: localStorage.getItem('userId'),
+        role: localStorage.getItem('userRole'),
       });
     }
   };

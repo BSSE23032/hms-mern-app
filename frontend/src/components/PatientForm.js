@@ -13,8 +13,11 @@ export default function PatientForm() {
   const navigate = useNavigate();
 
   const handleCancel = () => {
-    mixpanel.track('Press Cancel Button');
-    navigate('/'); 
+    mixpanel.track('Press Cancel Button', {
+      role: 'admin',
+      id: localStorage.getItem('userId'),
+    });
+    navigate('/');
   };
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -32,7 +35,16 @@ export default function PatientForm() {
         console.error('Doctor fetch error:', err);
         setFilteredDoctors([]);
       }
-      mixpanel.track("Visited Add Patient Form");
+      mixpanel.track("Visited Add Patient Form", {
+        role: localStorage.getItem('userRole'),
+        id: localStorage.getItem('userId'),
+      });
+      mixpanel.identify(localStorage.getItem('userId'));
+      mixpanel.people.set({
+        $name: localStorage.getItem('userName'),
+        role: localStorage.getItem('userRole'),
+        user_id: localStorage.getItem('userId')
+      });
     };
 
     if (med_problem) {
@@ -66,10 +78,11 @@ export default function PatientForm() {
       const data = await res.json();
       if (res.ok) {
         setMessage('Patient added successfully');
-         mixpanel.track('Patient Added', {
-              name: name,
-              doctor: doctor,
-  });
+        mixpanel.track('Patient Added', {
+          patient: name,
+          doctor: doctor,
+          id: localStorage.getItem('userId'),
+        });
         setName('');
         setAge('');
         setGender('');
@@ -82,7 +95,10 @@ export default function PatientForm() {
       console.error('Submit error:', err);
       setMessage('Something went wrong');
       mixpanel.track('Add Patient Failed', {
-      error: err.message || 'Unknown Error',e});
+        error: err.message || 'Unknown Error', e,
+        id: localStorage.getItem('userId'),
+        role: 'admin',
+      });
 
     }
   };

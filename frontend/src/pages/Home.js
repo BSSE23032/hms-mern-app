@@ -1,6 +1,8 @@
+import mixpanel from '../utils/mixpanel';
 import homeBanner from '../assets/img1.jpg';     
 import PatientImg from '../assets/img2.jpg';     
 export default function Home() {
+  mixpanel.track('Visit Home Page');
   return (
     <div className="container mt-4">
       {/* Top banner card */}

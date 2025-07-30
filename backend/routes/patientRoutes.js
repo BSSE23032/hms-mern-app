@@ -3,7 +3,7 @@ const router = express.Router();
 const patientController = require('../controllers/patientController');
 
 router.post('/', patientController.createPatient);
-router.get('/', patientController.getAllPatients);
+router.get('/', patientController.getPaginatedPatients);
 router.patch('/:id/mark-visited', patientController.markAsVisited);
 router.get('/doctor/:doctor', patientController.getPatientsByDoctor);  
 router.get('/:id', patientController.getPatientById);

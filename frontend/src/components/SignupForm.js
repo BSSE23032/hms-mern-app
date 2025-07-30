@@ -63,6 +63,8 @@ export default function SignupForm() {
         setSuccess('Registeration Successfull.');
         mixpanel.track('User Signed Up', {
           email: email,
+          role: role,
+          id: data.id,
         });
         navigate('/')
         setError('');

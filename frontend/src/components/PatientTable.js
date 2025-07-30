@@ -25,7 +25,7 @@ export default function PatientTable({ patient, on_delete, on_mark_visited, role
             </button>
           </div>
         )}
-        
+
         {role === 'doctor' && patient.doctor === doctor && patient.visited && (
           <span className="badge bg-success">Visited</span>
         )}
