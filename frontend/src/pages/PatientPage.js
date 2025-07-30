@@ -164,7 +164,10 @@ export default function PatientPage() {
           <div className="d-flex justify-content-between align-items-center mt-3">
             <button
               className="btn btn-primary"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => {
+                setLoading(true);
+                setCurrentPage(prev => Math.max(prev - 1, 1));
+              }}
               disabled={curr_page === 1}
 
             >
@@ -179,7 +182,10 @@ export default function PatientPage() {
             <button
               className="btn btn-primary"
 
-              onClick={() => setCurrentPage(prev => (prev < tot_pages ? prev + 1 : prev))}
+              onClick={() => {
+                setLoading(true);
+                setCurrentPage(prev => (prev < tot_pages ? prev + 1 : prev));
+              }}
               disabled={curr_page >= tot_pages}
             >
               Next
