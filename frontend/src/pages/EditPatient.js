@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import mixpanel from '../utils/mixpanel';
+import authFetch from "../utils/authFetch";
+import {getItemWithExpiry} from '../utils/localStorageWithExpiry';
 export default function EditPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -8,14 +10,12 @@ export default function EditPatient() {
   const [error, setError] = useState('');
   const [filtered_doctors, setfilteredDoctors] = useState([]);
 
-  const handleCancel = () => {
-    navigate('/');
-  };
+  const handleCancel = () => navigate('/patients');
 
   useEffect(() => {
     const fetchPatient = async () => {
       try {
-        const res = await fetch(`/api/patients/${id}`);
+        const res = await authFetch(`/api/patients/${id}`);
         const data = await res.json();
         if (res.ok) {
           setPatient(data);
@@ -30,31 +30,24 @@ export default function EditPatient() {
     fetchPatient();
   }, [id, navigate]);
 
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      if (!patient?.med_problem) return;
-      try {
-        const res = await fetch(`/api/users/doctors?specialization=${encodeURIComponent(patient.med_problem)}`);
-        const data = await res.json();
-        if (res.ok) {
-          setfilteredDoctors(data);
-        } else {
-          setfilteredDoctors([]);
-        }
-      } catch (err) {
-        console.error('Error fetching doctors:', err);
-        setfilteredDoctors([]);
-      }
-    };
-    mixpanel.track('Visit Edit Patient Page');
-    mixpanel.identify(localStorage.getItem('userId'));
-    mixpanel.people.set({
-      $name: localStorage.getItem('userName'),
-      role: localStorage.getItem('userRole'),
-      user_id: localStorage.getItem('userId')
-    });
-    fetchDoctors();
-  }, [patient?.med_problem]);
+useEffect(() => {
+  if (!patient || !patient.med_problem) return;
+
+  const fetchDoctors = async () => {
+    try {
+      const res = await authFetch(`/api/users/doctors?specialization=${encodeURIComponent(patient.med_problem)}`);
+      const data = await res.json();
+      if (res.ok) setfilteredDoctors(data);
+      else setfilteredDoctors([]);
+    } catch (err) {
+      console.error("Error fetching doctors:", err);
+      setfilteredDoctors([]);
+    }
+  };
+
+  fetchDoctors();
+}, [patient]);  // instead of patient?.med_problem
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,20 +70,17 @@ export default function EditPatient() {
     }
 
     try {
-      const res = await fetch(`/api/patients/${id}`, {
+      const res = await authFetch(`/api/patients/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(patient),
       });
 
       if (res.ok) {
         mixpanel.track('Patient Updated', {
-          patint_id: patient._id,
+          patient_id: patient._id,
           patient: patient.name,
-          admin: localStorage.getItem('userName'),
-          user_id: localStorage.getItem('userId'),
+          admin: getItemWithExpiry('userName'),
+          user_id: getItemWithExpiry('userId'),
         });
         navigate('/patients');
       } else {
@@ -101,16 +91,13 @@ export default function EditPatient() {
       console.error(err);
       setError("Something went wrong.");
       mixpanel.track('Update Patient Failed', {
-        error: err.message || 'Unknown Error',
+        error: err.message,
         patientId: patient._id,
-        id: localStorage.getItem('userId'),
-        role: localStorage.getItem('userRole'),
+        user_id: getItemWithExpiry('userId'),
       });
     }
   };
-
   if (!patient) return <p>Loading...</p>;
-
   return (
     <div className="container mt-3">
       <div className="row justify-content-center">

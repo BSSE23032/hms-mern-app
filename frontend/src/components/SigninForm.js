@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import mixpanel from "../utils/mixpanel";
+import { setItemWithExpiry, getItemWithExpiry } from '../utils/localStorageWithExpiry';
+
 export default function SigninForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -8,11 +10,11 @@ export default function SigninForm() {
   const [success, setSuccess] = useState('');
   const [show_password, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      navigate('/');  // redirect to homepage if already logged in
-    }
+    const userId = getItemWithExpiry('userId');
+    if (userId) navigate('/');
+
   }, [navigate]);
 
   const handleSubmit = async (e) => {
@@ -20,72 +22,37 @@ export default function SigninForm() {
 
     if (!email || !password) {
       setError('Please fill all required fields.');
-      mixpanel.track('Validation Failed - Sign In', {
-        missing: (!email && password) ? 'Email' : (!password && email) ? 'Password' : 'Email & Passwords',
-      });
       return;
     }
-
-    const user = {
-      email,
-      password
-    };
 
     try {
       const res = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user)
+        body: JSON.stringify({ email, password })
       });
 
       const data = await res.json();
       if (res.ok) {
         setSuccess('Login successful! Redirecting...');
-        setError('');
-        if (data && data._id) {
-          localStorage.setItem('userId', data._id);
-          localStorage.setItem('userRole', data.role);
-          localStorage.setItem('userName', data.name); // Store the name
-          localStorage.setItem('userSpecialization', data.specialization);
-          mixpanel.track('User Signed In', {
-            email: email,
-            role: data.role,
-            data: data._id
-          });
-          mixpanel.identify(localStorage.getItem('userId'));
+        const userData = data.user;
+        const expiry = 3600000;
+        setItemWithExpiry('token', data.token, expiry);
+        setItemWithExpiry('userId', data.user._id, expiry);
+        setItemWithExpiry('userRole', data.user.role, expiry);
+        setItemWithExpiry('userName', data.user.name, expiry);
+        setItemWithExpiry('userSpecialization', data.user.specialization);
 
-          mixpanel.people.set({
-            $name: data.name,
-            role: data.role,
-            user_id: data._id
-          });
-        } else {
-          console.error("User data missing in response:", data);
-          setError("Unexpected server response. Please try again.");
-          return;
-        }
+        mixpanel.track('User Signed In', { email, role: userData.role });
+        mixpanel.identify(userData._id);
+        mixpanel.people.set({ $name: userData.name, role: userData.role, user_id: userData._id });
 
-
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
+        setTimeout(() => navigate('/'), 1500);
       } else {
-
-        setError(data.message || data.error || ' Invalid email or password.');
-        mixpanel.track('Validation Failed - Sign In', {
-          incorect: 'Email or Password',
-        });
-
-        setSuccess('');
+        setError(data.message || data.error || 'Invalid email or password.');
       }
     } catch (err) {
-      setError(' Network error. Please try again.');
-      console.error('Login error:', err);
-      mixpanel.track('Sign In Failed', {
-        error: err.message || 'Unknown Error',
-        email: email,
-      });
-      setSuccess('');
+      setError('Network error. Please try again.');
     }
   };
 
@@ -97,7 +64,6 @@ export default function SigninForm() {
       {success && <div className="alert alert-success">{success}</div>}
 
       <form onSubmit={handleSubmit}>
-
         <div className="mb-3">
           <label>Email:</label>
           <input
@@ -123,12 +89,7 @@ export default function SigninForm() {
           <i
             className={`fa ${show_password ? 'fa-eye-slash' : 'fa-eye'} position-absolute`}
             onClick={() => setShowPassword(!show_password)}
-            style={{
-              right: '10px',
-              top: '38px',
-              cursor: 'pointer',
-              color: 'black',
-            }}
+            style={{ right: '10px', top: '38px', cursor: 'pointer', color: 'black' }}
           ></i>
         </div>
 

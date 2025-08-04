@@ -1,30 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import mixpanel from "../utils/mixpanel";
+import { getItemWithExpiry } from '../utils/localStorageWithExpiry';
 export default function PatientForm() {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [med_problem, setProblem] = useState('');
-  const [error, setError] = useState('');
   const [doctor, setDoctor] = useState('');
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   const handleCancel = () => {
     mixpanel.track('Press Cancel Button', {
-      role: 'admin',
-      id: localStorage.getItem('userId'),
+      role: getItemWithExpiry('userRole'),
+      id: getItemWithExpiry('userId'),
     });
     navigate('/');
   };
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const response = await fetch(`/api/users/doctors?specialization=${encodeURIComponent(med_problem)}`);
-        const data = await response.json();
+        const token = getItemWithExpiry('token');
+        const response = await fetch(`/api/users/doctors?specialization=${encodeURIComponent(med_problem)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
+        const data = await response.json();
         if (response.ok) {
           setFilteredDoctors(data);
         } else {
@@ -35,23 +39,16 @@ export default function PatientForm() {
         console.error('Doctor fetch error:', err);
         setFilteredDoctors([]);
       }
+
+      // Track mixpanel event
       mixpanel.track("Visited Add Patient Form", {
-        role: localStorage.getItem('userRole'),
-        id: localStorage.getItem('userId'),
-      });
-      mixpanel.identify(localStorage.getItem('userId'));
-      mixpanel.people.set({
-        $name: localStorage.getItem('userName'),
-        role: localStorage.getItem('userRole'),
-        user_id: localStorage.getItem('userId')
+        role: getItemWithExpiry('userRole'),
+        id: getItemWithExpiry('userId'),
       });
     };
 
-    if (med_problem) {
-      fetchDoctors();
-    } else {
-      setFilteredDoctors([]);
-    }
+    if (med_problem) fetchDoctors();
+    else setFilteredDoctors([]);
   }, [med_problem]);
 
   const handleSubmit = async (e) => {
@@ -68,10 +65,15 @@ export default function PatientForm() {
       setError('Age should be between 1 and 100.');
       return;
     }
+
     try {
+      const token = getItemWithExpiry('tokn');
       const res = await fetch('/api/patients', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({ name, age, gender, med_problem, doctor }),
       });
 
@@ -81,8 +83,10 @@ export default function PatientForm() {
         mixpanel.track('Patient Added', {
           patient: name,
           doctor: doctor,
-          id: localStorage.getItem('userId'),
+          id: getItemWithExpiry('userId'),
         });
+
+        // Reset form
         setName('');
         setAge('');
         setGender('');
@@ -95,22 +99,22 @@ export default function PatientForm() {
       console.error('Submit error:', err);
       setMessage('Something went wrong');
       mixpanel.track('Add Patient Failed', {
-        error: err.message || 'Unknown Error', e,
-        id: localStorage.getItem('userId'),
-        role: 'admin',
+        error: err.message || 'Unknown Error',
+        id: getItemWithExpiry('userId'),
+        role: getItemWithExpiry('userRole'),
       });
-
     }
   };
 
   return (
     <div className="container mt-4">
-      <center><small>All the fields with <b className='text-danger'>*</b> are required.</small></center>
+      <center><small>All fields with <b className='text-danger'>*</b> are required.</small></center>
       <div className="card p-4 shadow">
         {error && <div className="alert alert-danger">{error}</div>}
         <form onSubmit={handleSubmit} className="form-group">
           <div className="row">
             <div className="col-md-6 mx-auto">
+
               <div className="mb-3">
                 <label>Name: <b className='text-danger'>*</b></label>
                 <input
@@ -189,7 +193,7 @@ export default function PatientForm() {
                     <option disabled>No doctors found</option>
                   )}
                 </select>
-                <small>Problem should be selected first from list</small>
+                <small>Select problem first to filter doctors</small>
               </div>
 
               <div className="d-flex gap-2">
@@ -206,5 +210,4 @@ export default function PatientForm() {
       </div>
     </div>
   );
-
 }

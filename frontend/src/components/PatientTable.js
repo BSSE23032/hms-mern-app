@@ -9,9 +9,7 @@ export default function PatientTable({ patient, on_delete, on_mark_visited, role
       <td>{patient.med_problem}</td>
       <td>{patient.doctor}</td>
       <td>
-        {role === 'admin' && patient.visited && (
-          <span className="badge bg-success">Visited</span>
-        )}
+
         {role === 'admin' && !patient.visited && (
           <div className="btn-group">
             <Link to={`/edit/${patient._id}`} className="btn btn-sm btn-warning me-2">
@@ -26,10 +24,9 @@ export default function PatientTable({ patient, on_delete, on_mark_visited, role
           </div>
         )}
 
-        {role === 'doctor' && patient.doctor === doctor && patient.visited && (
+        {role === 'admin' && patient.visited && (
           <span className="badge bg-success">Visited</span>
         )}
-
         {role === 'doctor' && patient.doctor === doctor && !patient.visited && (
           <button
             className="btn btn-sm btn-success"
@@ -37,6 +34,10 @@ export default function PatientTable({ patient, on_delete, on_mark_visited, role
           >
             Mark as Visited
           </button>
+        )}
+
+        {role === 'doctor' && patient.doctor === doctor && patient.visited && (
+          <span className="badge bg-success">Visited</span>
         )}
       </td>
     </tr>

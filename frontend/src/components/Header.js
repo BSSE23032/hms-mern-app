@@ -1,16 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom';
 import mixpanel from '../utils/mixpanel';
+import {getItemWithExpiry} from '../utils/localStorageWithExpiry';
 export default function Header() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.clear(); 
     mixpanel.track('User Logged Out');
     navigate('/signin');
   };
 
-  const userId = localStorage.getItem('userId');
-  const userRole = localStorage.getItem('userRole');
+  const userId = getItemWithExpiry('userId');
+  const userRole = getItemWithExpiry('userRole');
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -38,7 +39,6 @@ export default function Header() {
               <Link to="/patients" className="nav-link">Patients</Link>
             </li>
 
-            {/* Conditionally show Add Patient only for admin */}
             {userRole === 'admin' && (
               <li className="nav-item">
                 <Link to="/add" className="nav-link">Add Patient</Link>
@@ -46,7 +46,6 @@ export default function Header() {
             )}
           </ul>
 
-          {/* Right-aligned auth buttons */}
           <div className="d-flex align-items-center">
             {userId ? (
               <>

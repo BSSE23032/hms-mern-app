@@ -1,119 +1,92 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-
-// Create new User
-const admin_key = 23032;
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 exports.createuser = async (req, res) => {
     try {
-        const email = req.body.email;
+        const { name, email, password, role, specialization, key } = req.body;
+
         const check_user = await User.findOne({ email });
         if (check_user) {
             return res.status(400).json({ error: 'This email is already in use' });
         }
-
-        if (req.body.role == 'admin') {
-            if (!req.body.key) {
-                return res.status(400).json({ error: 'Admin key is required' });
-            }
-            const key = req.body.key;
-            if (key != admin_key) {
-                return res.status(400).json({ error: 'Wrong admin key' });
+       if (role === 'admin') {
+            if (!key || key != process.env.ADMIN_KEY) {
+                return res.status(400).json({ error: 'Invalid or missing admin key' });
             }
         }
 
-        const { name, password, role, specialization } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = new User({
-            name,
-            email,
-            password: hashedPassword,
-            role,
-            specialization
-        });
-
+        const user = new User({ name, email, password: hashedPassword, role, specialization });
         await user.save();
-        res.status(201).json(user);
+        const { password: pw, ...userData } = user.toObject();
+        res.status(201).json(userData);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 };
 
-// Get all Users
 exports.getAllusers = async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find().select('-password');
         res.json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-// Get User by ID
 exports.loginuser = async (req, res) => {
-    try {
-        const email = req.body.email;
-        const password = req.body.password;
-        const user = await User.findOne({ email });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        res.status(200).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            specialization: user.specialization
-        });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' } 
+    );
+
+    const { password: pw, ...userData } = user.toObject();
+    res.status(200).json({ token, user: userData });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-// Update User
-exports.updateuser = async (req, res) => {
-    try {
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(user);
-    } catch (err) {
-        res.status(400).json({ error: err.message }); a
-    }
-};
-
-// Delete User
 exports.deleteuser = async (req, res) => {
     try {
-        await User.findByIdAndDelete(req.params.id);
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
         res.json({ message: 'User deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
-// GET /api/users/:id
+
 exports.getuserbyID = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('email role');
+        const user = await User.findById(req.params.id).select('email role name');
         if (!user) return res.status(404).json({ error: 'User not found' });
-
-        res.json({ role: user.role });
+        res.json(user);
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
 };
-// GET /api/users/doctors?specialization=Cardiologist
+
 exports.getDoctors = async (req, res) => {
   try {
     const { specialization } = req.query;
-
     const filter = specialization
       ? { role: 'doctor', specialization }
       : { role: 'doctor' };
 
     const doctors = await User.find(filter, 'name specialization email');
-
     res.status(200).json(doctors);
   } catch (err) {
     console.error('Error fetching doctors:', err);

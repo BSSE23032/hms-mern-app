@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import mixpanel from "../utils/mixpanel";
 import PatientTable from '../components/PatientTable';
-
+import authFetch from "../utils/authFetch";
+import {getItemWithExpiry} from '../utils/localStorageWithExpiry';
 export default function PatientPage() {
-  const user_id = localStorage.getItem('userId');
-  const user_role = localStorage.getItem('userRole');
-  const doctor_name = localStorage.getItem('userName');
+  const user_id = getItemWithExpiry('userId');
+  const user_role = getItemWithExpiry('userRole');
+  const doctor_name = getItemWithExpiry('userName');
 
   const [patients, setPatients] = useState([]);
   const [tot_patients, setTotalPatients] = useState(0);
@@ -15,6 +16,7 @@ export default function PatientPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [search_term, setSearchTerm] = useState("");
+
   const fetchPatients = async () => {
     try {
       let baseUrl = `/api/patients?page=${curr_page}&limit=${entries_per_page}&search=${search_term}`;
@@ -22,7 +24,7 @@ export default function PatientPage() {
         baseUrl = `/api/patients/doctor/${encodeURIComponent(doctor_name)}?page=${curr_page}&limit=${entries_per_page}&search=${search_term}`;
       }
 
-      const response = await fetch(baseUrl);
+      const response = await authFetch(baseUrl);
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.message || 'Failed to fetch patients');
@@ -40,17 +42,9 @@ export default function PatientPage() {
   useEffect(() => {
     if (user_id) {
       fetchPatients();
-      mixpanel.track("Visited Patient Page", {
-        user_id: user_id,
-        role: user_role
-      });
-      mixpanel.identify(localStorage.getItem('userId'));
-
-      mixpanel.people.set({
-        $name: localStorage.getItem('userName'),
-        role: localStorage.getItem('userRole'),
-        user_id: localStorage.getItem('userId')
-      });
+      mixpanel.track("Visited Patient Page", { user_id, role: user_role });
+      mixpanel.identify(user_id);
+      mixpanel.people.set({ $name: doctor_name, role: user_role, user_id });
     } else {
       setError("Please log in to view patients.");
     }
@@ -58,15 +52,12 @@ export default function PatientPage() {
 
   const handleDelete = async (id) => {
     if (user_role !== 'admin') return;
-
-    mixpanel.track('Click Delete Patient Button', {
-      user_id: user_id,
-      role: user_role
-    });
     if (!window.confirm('Are you sure you want to delete this patient?')) return;
 
+    mixpanel.track('Click Delete Patient Button', { user_id, role: user_role });
+
     try {
-      const response = await fetch(`/api/patients/${id}`, { method: 'DELETE' });
+      const response = await authFetch(`/api/patients/${id}`, { method: 'DELETE' });
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Failed to delete patient');
@@ -75,24 +66,16 @@ export default function PatientPage() {
       fetchPatients();
     } catch (err) {
       setError(err.message);
-      mixpanel.track('Delete Patient Failed', {
-        error: err.message,
-        patientId: id,
-        user_id: user_id
-      });
+      mixpanel.track('Delete Patient Failed', { error: err.message, patientId: id, user_id });
     }
   };
 
   const handleMarkVisited = async (id) => {
     const patient_name = patients.find(p => p._id === id)?.name;
-    mixpanel.track('Click mark as visited button', {
-      doctor: doctor_name,
-      user_id: user_id,
-      patient: patient_name
-    });
+    mixpanel.track('Click mark as visited button', { doctor: doctor_name, user_id, patient: patient_name });
 
     try {
-      const res = await fetch(`/api/patients/${id}/mark-visited`, { method: 'PATCH' });
+      const res = await authFetch(`/api/patients/${id}/mark-visited`, { method: 'PATCH' });
       const data = await res.json();
       if (res.ok) {
         fetchPatients();
@@ -101,14 +84,9 @@ export default function PatientPage() {
       }
     } catch (err) {
       console.error('Network error:', err);
-      mixpanel.track('Mark Patient as visited failed', {
-        doctor: doctor_name,
-        user_id: user_id,
-        patient: patient_name
-      });
+      mixpanel.track('Mark Patient as visited failed', { doctor: doctor_name, user_id, patient: patient_name });
     }
   };
-
   const last_entry = curr_page * entries_per_page;
   const first_entry = last_entry - entries_per_page;
 

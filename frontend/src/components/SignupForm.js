@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import mixpanel from "../utils/mixpanel";
+import {getItemWithExpiry} from '../utils/localStorageWithExpiry';
 export default function SignupForm() {
   const [role, setRole] = useState('');
   const [name, setName] = useState('');
@@ -14,11 +15,9 @@ export default function SignupForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      navigate('/');  // redirect to homepage if already logged in
-    }
+    if (getItemWithExpiry('userId')) navigate('/');
   }, [navigate]);
+
   const handleRoleChange = (e) => {
     setRole(e.target.value);
     setAdminCode('');
@@ -29,18 +28,13 @@ export default function SignupForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Local field validation before sending to backend
     if (!role || !email || !password || !name ||
       (role === 'admin' && !adminCode) ||
       (role === 'doctor' && !specialization)) {
       setError(' Please fill all required fields.');
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
+
     const user = {
       role,
       name,
@@ -58,42 +52,15 @@ export default function SignupForm() {
       });
 
       const data = await res.json();
-
       if (res.ok) {
-        setSuccess('Registeration Successfull.');
-        mixpanel.track('User Signed Up', {
-          email: email,
-          role: role,
-          id: data.id,
-        });
-        navigate('/')
-        setError('');
-        setRole('');
-        setName('');
-        setEmail('');
-        setPassword('');
-        setAdminCode('');
-        setSpecialization('');
-
+        setSuccess('Registration Successful. Redirecting to Login...');
+        mixpanel.track('User Signed Up', { email, role });
+        setTimeout(() => navigate('/signin'), 1500);
       } else {
-        if (data.error === 'This email is already in use') {
-          setError(' This email is already registered. Please use another.');
-        } else if (data.error === 'Wrong admin key') {
-          setError(' Admin code is incorrect.');
-        } else if (data.error === 'Admin key is required') {
-          setError('Admin key is required to register as an admin.');
-        } else {
-          setError(data.error || ' Signup failed. Please try again.');
-        }
-        setSuccess('');
+        setError(data.error || ' Signup failed. Please try again.');
       }
     } catch (err) {
-      setError('Something went wrong. Please check your internet and try again.');
-      mixpanel.track('Sign Up Failed', {
-        error: err.message || 'Unknown Error',
-        email: email,
-      });
-      setSuccess('');
+      setError('Something went wrong. Please try again.');
     }
   };
 
@@ -114,12 +81,6 @@ export default function SignupForm() {
           </select>
         </div>
 
-        {role && (
-          <h5 className="text-center mb-3">
-            <b>Role:</b> <span>{role}</span>
-          </h5>
-        )}
-
         {role === 'admin' && (
           <div className="mb-3">
             <label>Admin Key:</label>
@@ -129,7 +90,6 @@ export default function SignupForm() {
               value={adminCode}
               onChange={(e) => setAdminCode(e.target.value)}
               required
-              placeholder="Enter admin key"
             />
           </div>
         )}
@@ -158,26 +118,12 @@ export default function SignupForm() {
 
         <div className="mb-3">
           <label>Name:</label>
-          <input
-            type="text"
-            className="form-control"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            placeholder="Enter full name"
-          />
+          <input type="text" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
 
         <div className="mb-3">
           <label>Email:</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="e.g. example@hospital.com"
-          />
+          <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
 
         <div className="mb-3 position-relative">
@@ -187,18 +133,12 @@ export default function SignupForm() {
             className="form-control pe-5"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
             required
           />
           <i
             className={`fa ${show_password ? 'fa-eye-slash' : 'fa-eye'} position-absolute`}
             onClick={() => setShowPassword(!show_password)}
-            style={{
-              right: '10px',
-              top: '38px',
-              cursor: 'pointer',
-              color: 'black',
-            }}
+            style={{ right: '10px', top: '38px', cursor: 'pointer', color: 'black' }}
           ></i>
         </div>
 
